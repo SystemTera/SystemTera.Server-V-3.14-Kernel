@@ -1,0 +1,17 @@
+kernel 3.14 Build
+1. config
+make menuconfig
+
+3. check pinmappings
+vi arch/arm/boot/dts/var-som-am33.dtb
+
+4. build dtbs
+make am335x-evm.dtb am335x-evmsk.dtb am335x-bone.dtb am335x-boneblack.dtb var-som-am33.dtb
+
+5. build kernel
+make -j5
+
+6. build zImage
+make zImage
+
+
