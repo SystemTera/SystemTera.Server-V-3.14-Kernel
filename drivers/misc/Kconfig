@@ -515,6 +515,16 @@ config SRAM
 	  the genalloc API. It is supposed to be used for small on-chip SRAM
 	  areas found on many SoCs.
 
+config GE_COUNTER
+        tristate "SystemTera.ServerV: GPIO IRQ Counter"
+        depends on SYSFS && GPIOLIB
+        default n
+        help
+          Platform device that counts incoming GPIO signals and shows
+          current state via SysFS interface. Shows counts in last
+          completed interval if configured.
+
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"

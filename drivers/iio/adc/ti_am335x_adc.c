@@ -418,6 +418,8 @@ static int tiadc_probe(struct platform_device *pdev)
 	u32			val;
 	int			channels = 0;
 
+	dev_info(&pdev->dev, "Probe tiadc module...\n");
+
 	if (!node) {
 		dev_err(&pdev->dev, "Could not find valid DT data.\n");
 		return -EINVAL;

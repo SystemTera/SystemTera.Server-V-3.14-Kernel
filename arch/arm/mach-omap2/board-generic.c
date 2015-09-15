@@ -160,7 +160,7 @@ static const char *am33xx_boards_compat[] __initconst = {
 	NULL,
 };
 
-DT_MACHINE_START(AM33XX_DT, "Generic AM33XX (Flattened Device Tree)")
+DT_MACHINE_START(AM33XX_DT, "Generic AM33XX VAR-SOM-AM33")
 	.reserve	= am33xx_reserve,
 	.map_io		= am33xx_map_io,
 	.init_early	= am33xx_init_early,

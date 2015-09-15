@@ -24,6 +24,13 @@ config LEDS_CLASS
 
 comment "LED drivers"
 
+config LEDS_BOOT
+        tristate "LED device for SystemTera.Server-V"
+        help
+          Provides access to the 3 LEDs on the SystemTera.Server-V via /dev/lc1.
+          During power-on, the LEDs are set to blink.
+
+
 config LEDS_88PM860X
 	tristate "LED Support for Marvell 88PM860x PMIC"
 	depends on LEDS_CLASS
