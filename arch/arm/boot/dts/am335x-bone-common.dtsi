@@ -339,6 +339,6 @@
 	ti,scale-data-fw = "am335x-bone-scale-data.bin";
 };
 
-&rtc {
+/*&rtc {
 	ti,system-power-controller;
-};
+};*/

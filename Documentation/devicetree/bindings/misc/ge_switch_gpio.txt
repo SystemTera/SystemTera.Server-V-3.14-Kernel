@@ -1,0 +1,43 @@
+Device-Tree bindings for misc/switch/ge_switch_gpio.c GPIO dip/hex switch driver
+
+Required properties:
+	- compatible = "ginzinger,ge_switch_gpio";
+
+
+Each switch is represented as sub-node:
+Optional switch sub-node-properties:
+	- label: descriptive name of the switch (default: node name)
+
+A switch consists of a multiple number of pins (sub-nodes of switch):
+Required pin sub-node property:
+	- gpios: OF device-tree gpio specification
+	- mask: bitmask determining which bit of resulting value is filled with state of specified GPIO
+
+
+
+Example nodes:
+
+	switches {
+		compatible = "ginzinger,ge_switch_gpio";
+
+		bt_hardware_version {
+			label = "bt_hardware_version";
+
+			gpio_switch_hw1 {
+				gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
+				mask = <1>;
+			};
+			gpio_switch_hw2 {
+				gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>;
+				mask = <2>;
+			};
+			gpio_switch_hw3 {
+				gpios = <&gpio1 8 GPIO_ACTIVE_HIGH>;
+				mask = <4>;
+			};
+
+			...
+		};
+
+		...
+	};

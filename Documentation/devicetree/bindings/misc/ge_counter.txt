@@ -1,0 +1,30 @@
+Device-Tree bindings for misc/ge_counter.c GPIO event counter
+
+Required properties:
+	- compatible = "ginzinger,ge_counter";
+
+Each counter is represented as a sub-node:
+Required subnode property:
+	- gpios: OF device-tree gpio specification
+
+Optional subnode-properties:
+	- label: descriptive name of the counter (default: node name)
+	- irq-type (default: IRQ_TYPE_EDGE_RISING)
+	  (see include/dt-bindings/interrupt-controller/irq.h)
+	- interval in [ms] (default: 0) to enable interval counting
+
+
+Example nodes:
+
+	counter {
+		compatible = "ginzinger,ge_counter";
+
+		di0 {
+			label = "di0";
+			gpios = <&gpio6 2 GPIO_ACTIVE_HIGH>;
+			irq-type = <IRQ_TYPE_EDGE_RISING>;
+			interval = <0>; // ms
+		};
+
+		...
+	};

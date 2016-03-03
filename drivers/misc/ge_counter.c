@@ -163,7 +163,7 @@ static ssize_t interval_store(struct kobject *kobj, struct kobj_attribute *attr,
 static ssize_t state_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
 	struct counter_data *d = container_of(attr, struct counter_data, state_attr);
-	return snprintf(buf, PAGE_SIZE, "%u\n", !gpio_get_value(d->gpio));
+	return snprintf(buf, PAGE_SIZE, "%u\n", !!gpio_get_value(d->gpio));
 }
 
 static ssize_t interval_count_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
@@ -213,81 +213,109 @@ static void delete_counter(struct counter_data *data)
 	kobject_put(data->subdir);
 }
 
-static struct ge_counter systemtera_serverv_counter_map[] = {
-        {
-                .name = "in1",
-                .gpio = 52, // GPIO_1_20 [GPMC_A4]
-                .irq_type = IRQ_TYPE_EDGE_RISING,
-                .interval = 0, // [ms]
-                .reset_on_read = false
-        },
-        {
-                .name = "in2",
-                .gpio = 50, // GPIO_1_18 [GPMC_A2]
-                .irq_type = IRQ_TYPE_EDGE_RISING,
-                .interval = 0, // [ms]
-                .reset_on_read = false
-        },
-        {
-                .name = "in3",
-                .gpio = 48, // GPIO_1_16 [GPMC_A0]
-                .irq_type = IRQ_TYPE_EDGE_RISING,
-                .interval = 0, // [ms]
-                .reset_on_read = false
-        },
-        {
-                .name = "in4",
-                .gpio = 54, // GPIO_1_22 [GPMC_A6]
-                .irq_type = IRQ_TYPE_EDGE_RISING,
-                .interval = 0, // [ms]
-                .reset_on_read = false
-        },
-        {
-                .name = "in5",
-                .gpio = 56, // GPIO_1_24 [GPMC_A8]
-                .irq_type = IRQ_TYPE_EDGE_RISING,
-                .interval = 0, // [ms]
-                .reset_on_read = false
-        },
-        {
-                .name = "in6",
-                .gpio = 58, // GPIO_1_26 [GPMC_A10]
-                .irq_type = IRQ_TYPE_EDGE_RISING,
-                .interval = 0, // [ms]
-                .reset_on_read = false
-        },
-        {
-                .name = "in7",
-                .gpio = 55, // GPIO_1_23 [GPMC_A7]
-                .irq_type = IRQ_TYPE_EDGE_RISING,
-                .interval = 0, // [ms]
-                .reset_on_read = false
-        },
-        {
-                .name = "in8",
-                .gpio = 53, // GPIO_1_21 [GPMC_A5]
-                .irq_type = IRQ_TYPE_EDGE_RISING,
-                .interval = 0, // [ms]
-                .reset_on_read = false
-        },
-};
+#ifdef CONFIG_OF
+static struct ge_counter_platform_data *ge_counter_get_devtree_pdata(struct device *dev)
+{
+	int error, num_counter;
+	struct ge_counter_platform_data *pdata;
+	struct ge_counter *counter;
+	struct device_node *node = dev->of_node, *pp;
 
-static struct ge_counter_platform_data systemtera_serverv_counter_data = {
-        .num_counter = ARRAY_SIZE(systemtera_serverv_counter_map),
-        .counter = systemtera_serverv_counter_map,
-};
+	if (!node) {
+		error = -ENODEV;
+		goto err_out;
+	}
 
-static struct platform_device systemtera_serverv_counter_device = {
-        .name                   = "ge_counter",
+	num_counter = of_get_child_count(node);
+	if (!num_counter) {
+		error = -ENODEV;
+		goto err_out;
+	}
+
+	pdata = kzalloc(sizeof(*pdata) + num_counter * sizeof(*counter), GFP_KERNEL);
+	if (!pdata) {
+		error = -ENOMEM;
+		goto err_out;
+	}
+
+	pdata->counter = (struct ge_counter *)(pdata + 1);
+	pdata->num_counter = num_counter;
+
+	counter = pdata->counter;
+	for_each_child_of_node(node, pp) {
+		const char *name;
+		int gpio;
+		u32 irq_type;
+		u32 interval;
+
+		if (!of_find_property(pp, "gpios", NULL)) {
+			pdata->num_counter--;
+			dev_warn(dev, "Found counter without gpios\n");
+			continue;
+		}
+
+		gpio = of_get_gpio_flags(pp, 0, NULL);
+		if (gpio < 0) {
+			error = gpio;
+			if (error != -EPROBE_DEFER)
+				dev_err(dev, "Failed to get gpio, error: %d\n", error);
+			goto err_free_pdata;
+		}
+
+		if (of_property_read_u32(pp, "irq-type", &irq_type))
+			irq_type = IRQ_TYPE_EDGE_RISING;
+
+		if (of_property_read_u32(pp, "interval", &interval))
+			interval = 0;
+
+		name = of_get_property(pp, "label", NULL);
+		if (!name)
+			name = pp->name;
+
+		counter->name = name;
+		counter->gpio = gpio;
+		counter->irq_type = irq_type;
+		counter->interval = interval;
+		counter->reset_on_read = of_property_read_bool(pp, "reset-on-read");
+		counter++;
+	}
+
+	return pdata;
+
+err_free_pdata:
+	kfree(pdata);
+err_out:
+	return ERR_PTR(error);
+}
+
+static struct of_device_id ge_counter_of_match[] = {
+	{ .compatible = "ginzinger,ge_counter", },
+	{ },
 };
+MODULE_DEVICE_TABLE(of, ge_counter_of_match);
+
+#else
+static inline struct ge_counter_platform_data *ge_counter_get_devtree_pdata(struct device *dev)
+{
+	dev_err(dev, "no platform data defined\n");
+	return ERR_PTR(-ENODEV);
+}
+#endif // CONFIG_OF
 
 static int ge_counter_probe(struct platform_device *pdev)
 {
-	struct ge_counter_platform_data *pdata = &systemtera_serverv_counter_data;
+	struct device *dev = &pdev->dev;
+	struct ge_counter_platform_data *pdata = dev_get_platdata(dev);
 	struct driver_data *data;
 	struct counter_data *dest;
 	unsigned int irq;
 	int i, ret;
+
+	if (!pdata) {
+		pdata = ge_counter_get_devtree_pdata(dev);
+		if (IS_ERR(pdata))
+			return PTR_ERR(pdata);
+	}
 
 	data = kzalloc(sizeof(struct driver_data) + sizeof(struct counter_data)
 			* pdata->num_counter, GFP_KERNEL);
@@ -462,6 +490,7 @@ static struct platform_driver ge_counter_driver = {
 	.driver = {
 		.name = "ge_counter",
 		.owner = THIS_MODULE,
+		.of_match_table = of_match_ptr(ge_counter_of_match),
 	},
 	.probe = ge_counter_probe,
 	.remove = __exit_p(ge_counter_remove),
@@ -469,10 +498,7 @@ static struct platform_driver ge_counter_driver = {
 
 static int __init ge_counter_init(void)
 {
-	int rc = platform_driver_register(&ge_counter_driver);
-	if (!rc)
-	  rc = platform_device_register(&systemtera_serverv_counter_device);
-	return(rc);
+	return platform_driver_register(&ge_counter_driver);
 }
 
 static void __exit ge_counter_exit(void)
