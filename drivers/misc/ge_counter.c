@@ -163,7 +163,7 @@ static ssize_t interval_store(struct kobject *kobj, struct kobj_attribute *attr,
 static ssize_t state_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
 	struct counter_data *d = container_of(attr, struct counter_data, state_attr);
-	return snprintf(buf, PAGE_SIZE, "%u\n", !!gpio_get_value(d->gpio));
+	return snprintf(buf, PAGE_SIZE, "%u\n", !gpio_get_value(d->gpio));
 }
 
 static ssize_t interval_count_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)

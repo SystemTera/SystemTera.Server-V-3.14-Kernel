@@ -128,7 +128,7 @@
 
 		in1 {
 				label = "in1";
-				gpios = <&gpio1 20 GPIO_ACTIVE_HIGH>;
+				gpios = <&gpio1 20 GPIO_ACTIVE_LOW>;
 				irq-type = <IRQ_TYPE_EDGE_RISING>;
 				interval = <0>; //ms
 		};
@@ -457,9 +457,9 @@
 		gpio_keys_s0: gpio_keys_s0 {
 		       pinctrl-single,pins = <
 			       0x118 (PIN_INPUT_PULLUP | MUX_MODE7)    /* GPIO3_4 */
-			       0x178  (PIN_INPUT | MUX_MODE7) /* FKEY GPIO0_12 */
-                               0x198  (PIN_INPUT | MUX_MODE7) /* KNX_BUTTON GPIO0_17 */
-			       0x11c ( PIN_OUTPUT | MUX_MODE7 ) /* KNX_LED (J18) gmii1_txd3.gpio0[16] */
+			       0x178 (PIN_INPUT | MUX_MODE7) /* FKEY GPIO0_12 */
+                               0x198 (PIN_INPUT | MUX_MODE7) /* KNX_BUTTON GPIO0_17 */
+			       0x11c (PIN_OUTPUT | MUX_MODE7 ) /* KNX_LED (J18) gmii1_txd3.gpio0[16] */
                                0xec (PIN_OUTPUT | MUX_MODE7) /* LED 1 red */
                                0x4c (PIN_OUTPUT | MUX_MODE7) /* LED 1 green */
                                0x44 (PIN_OUTPUT | MUX_MODE7) /* LED 2 green */
@@ -468,14 +468,14 @@
                                0x88 (PIN_OUTPUT | MUX_MODE7) /* LED 3 red */
 			       0x64 (PIN_OUTPUT | MUX_MODE7) /*gpmc_a9 out1 */
                                0x6c (PIN_OUTPUT | MUX_MODE7) /*gpmc_a11 out2 */
-			       0x40 ( PIN_INPUT | MUX_MODE7 ) /* (R13) gpmc_a0.gpio1[16] */
-	    		       0x48 ( PIN_INPUT | MUX_MODE7 ) /* (U14) gpmc_a2.gpio1[18] */
-			       0x50 ( PIN_INPUT | MUX_MODE7 ) /* (R14) gpmc_a4.gpio1[20] */
-			       0x54 ( PIN_INPUT | MUX_MODE7 ) /* (V15) gpmc_a5.gpio1[21] */
-			       0x58 ( PIN_INPUT | MUX_MODE7 ) /* (U15) gpmc_a6.gpio1[22] */
-			       0x5c ( PIN_INPUT | MUX_MODE7 ) /* (T15) gpmc_a7.gpio1[23] */
-			       0x60 ( PIN_INPUT | MUX_MODE7 ) /* (V16) gpmc_a8.gpio1[24] */
-			       0x68 ( PIN_INPUT | MUX_MODE7 ) /* (T16) gpmc_a10.gpio1[26] */
+			       0x40 (PIN_INPUT_PULLUP | MUX_MODE7 ) /* (R13) gpmc_a0.gpio1[16] */
+	    		       0x48 (PIN_INPUT_PULLUP | MUX_MODE7 ) /* (U14) gpmc_a2.gpio1[18] */
+			       0x50 (PIN_INPUT_PULLDOWN | MUX_MODE7 ) /* (R14) gpmc_a4.gpio1[20] */
+			       0x54 (PIN_INPUT_PULLUP | MUX_MODE7 ) /* (V15) gpmc_a5.gpio1[21] */
+			       0x58 (PIN_INPUT_PULLUP | MUX_MODE7 ) /* (U15) gpmc_a6.gpio1[22] */
+			       0x5c (PIN_INPUT_PULLUP | MUX_MODE7 ) /* (T15) gpmc_a7.gpio1[23] */
+			       0x60 (PIN_INPUT_PULLUP | MUX_MODE7 ) /* (V16) gpmc_a8.gpio1[24] */
+			       0x68 (PIN_INPUT_PULLUP | MUX_MODE7 ) /* (T16) gpmc_a10.gpio1[26] */
 		       >;
 		};
 
@@ -947,7 +947,7 @@
 
 &tscadc {
 	adc {
-		ti,adc-channels = <0 1 2 3 4 5 6 7>;
+		ti,adc-channels = <0 1 2 3 4 5 6 >;
 	};
 };
 
